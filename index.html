@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>BlobRunner</title>
+</head>
+
+<body>
+
+  <script type="module">
+    async function run(url) {
+      const rt = await import("https://hikne2.github.io/vortex/1.0/runtime.js");
+      rt.setup({ bundle: url });
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    let v = params.get("v");
+
+    async function fileExists(url) {
+      try {
+        const res = await fetch(url, { method: "HEAD" });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    function makeURL(v) {
+      return window.location.origin + "/" + v + ".vortex";
+    }
+
+    async function main() {
+      let fileUrl;
+
+      if (v) {
+        fileUrl = makeURL(v);
+
+        const exists = await fileExists(fileUrl);
+        if (!exists) {
+          alert("Version file does not exist");
+          return;
+        }
+      } else {
+        const res = await fetch("./latest.txt");
+        if (!res.ok) {
+          alert("Failed to fetch latest version");
+          return;
+        }
+
+        v = (await res.text()).trim();
+
+        fileUrl = makeURL(v);
+      }
+
+      run(fileUrl);
+    }
+
+    main();
+  </script>
+
+</body>
+
+</html>
